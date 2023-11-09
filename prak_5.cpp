@@ -26,178 +26,11 @@ private:
 	NodePtr root;
 	NodePtr TNULL;
 
-	void initializeNULLNode(NodePtr node, NodePtr parent) {
-		node->data = 0;
-		node->parent = parent;
-		node->left = nullptr;
-		node->right = nullptr;
-		node->color = 0;
-	}
-
-	void preOrderHelper(NodePtr node) {
-		if (node != TNULL) {
-			cout << node->data << " ";
-			preOrderHelper(node->left);
-			preOrderHelper(node->right);
-		}
-	}
-
 	void inOrderHelper(NodePtr node) {
 		if (node != TNULL) {
 			inOrderHelper(node->left);
 			cout << node->data << " ";
 			inOrderHelper(node->right);
-		}
-	}
-
-	void postOrderHelper(NodePtr node) {
-		if (node != TNULL) {
-			postOrderHelper(node->left);
-			postOrderHelper(node->right);
-			cout << node->data << " ";
-		}
-	}
-
-	NodePtr searchTreeHelper(NodePtr node, int key) {
-		if (node == TNULL || key == node->data) {
-			return node;
-		}
-
-		if (key < node->data) {
-			return searchTreeHelper(node->left, key);
-		}
-		return searchTreeHelper(node->right, key);
-	}
-
-	void fixDelete(NodePtr x) {
-		NodePtr s;
-		while (x != root && x->color == 0) {
-			if (x == x->parent->left) {
-				s = x->parent->right;
-				if (s->color == 1) {
-					s->color = 0;
-					x->parent->color = 1;
-					leftRotate(x->parent);
-					s = x->parent->right;
-				}
-
-				if (s->left->color == 0 && s->right->color == 0) {
-					s->color = 1;
-					x = x->parent;
-				}
-				else {
-					if (s->right->color == 0) {
-						s->left->color = 0;
-						s->color = 1;
-						rightRotate(s);
-						s = x->parent->right;
-					}
-
-					s->color = x->parent->color;
-					x->parent->color = 0;
-					s->right->color = 0;
-					leftRotate(x->parent);
-					x = root;
-				}
-			}
-			else {
-				s = x->parent->left;
-				if (s->color == 1) {
-					s->color = 0;
-					x->parent->color = 1;
-					rightRotate(x->parent);
-					s = x->parent->left;
-				}
-
-				if (s->right->color == 0 && s->right->color == 0) {
-					s->color = 1;
-					x = x->parent;
-				}
-				else {
-					if (s->left->color == 0) {
-						s->right->color = 0;
-						s->color = 1;
-						leftRotate(s);
-						s = x->parent->left;
-					}
-
-					s->color = x->parent->color;
-					x->parent->color = 0;
-					s->left->color = 0;
-					rightRotate(x->parent);
-					x = root;
-				}
-			}
-		}
-		x->color = 0;
-	}
-
-
-	void rbTransplant(NodePtr u, NodePtr v) {
-		if (u->parent == nullptr) {
-			root = v;
-		}
-		else if (u == u->parent->left) {
-			u->parent->left = v;
-		}
-		else {
-			u->parent->right = v;
-		}
-		v->parent = u->parent;
-	}
-
-	void deleteNodeHelper(NodePtr node, int key) {
-		NodePtr z = TNULL;
-		NodePtr x, y;
-		while (node != TNULL) {
-			if (node->data == key) {
-				z = node;
-			}
-
-			if (node->data <= key) {
-				node = node->right;
-			}
-			else {
-				node = node->left;
-			}
-		}
-
-		if (z == TNULL) {
-			cout << "Couldn't find key in the tree" << endl;
-			return;
-		}
-
-		y = z;
-		int y_original_color = y->color;
-		if (z->left == TNULL) {
-			x = z->right;
-			rbTransplant(z, z->right);
-		}
-		else if (z->right == TNULL) {
-			x = z->left;
-			rbTransplant(z, z->left);
-		}
-		else {
-			y = minimum(z->right);
-			y_original_color = y->color;
-			x = y->right;
-			if (y->parent == z) {
-				x->parent = y;
-			}
-			else {
-				rbTransplant(y, y->right);
-				y->right = z->right;
-				y->right->parent = y;
-			}
-
-			rbTransplant(z, y);
-			y->left = z->left;
-			y->left->parent = y;
-			y->color = z->color;
-		}
-		delete z;
-		if (y_original_color == 0) {
-			fixDelete(x);
 		}
 	}
 
@@ -260,7 +93,7 @@ private:
 				indent += "|    ";
 			}
 
-			string sColor = root->color ? "RED" : "BLACK";
+			string sColor = root->color ? "R" : "B";
 			cout << root->data << "(" << sColor << ")" << endl;
 			printHelper(root->left, indent, false);
 			printHelper(root->right, indent, true);
@@ -289,21 +122,9 @@ public:
 		root = TNULL;
 	}
 
-	void preorder() {
-		preOrderHelper(this->root);
-	}
-
 	void inorder() {
 		inOrderHelper(this->root);
 		cout << "\n";
-	}
-	
-	void postorder() {
-		postOrderHelper(this->root);
-	}
-
-	NodePtr searchTree(int k) {
-		return searchTreeHelper(this->root, k);
 	}
 
 	NodePtr minimum(NodePtr node) {
@@ -311,40 +132,6 @@ public:
 			node = node->left;
 		}
 		return node;
-	}
-
-	NodePtr maximum(NodePtr node) {
-		while (node->right != TNULL) {
-			node = node->right;
-		}
-		return node;
-	}
-
-	NodePtr successor(NodePtr x) {
-		if (x->right != TNULL) {
-			return minimum(x->right);
-		}
-
-		NodePtr y = x->parent;
-		while (y != TNULL && x == y->right) {
-			x = y;
-			y = y->parent;
-		}
-		return y;
-	}
-
-	NodePtr predecessor(NodePtr x) {
-		if (x->left != TNULL) {
-			return maximum(x->left);
-		}
-
-		NodePtr y = x->parent;
-		while (y != TNULL && x == y->left) {
-			x = y;
-			y = y->parent;
-		}
-
-		return y;
 	}
 
 	void leftRotate(NodePtr x) {
@@ -431,14 +218,6 @@ public:
 		fixInsert(node);
 	}
 
-	NodePtr getRoot() {
-		return this->root;
-	}
-
-	void deleteNode(int data) {
-		deleteNodeHelper(this->root, data);
-	}
-
 	void prettyPrint() {
 		if (root) {
 			printHelper(this->root, "", true);
@@ -498,10 +277,8 @@ int main() {
 	bst.insert(5);
 	bst.insert(15);
 	bst.insert(17);
-	bst.insert(25);
 	bst.insert(40);
 	bst.insert(80);
-	bst.deleteNode(25);
 	bst.prettyPrint();
 
 	bst.inorder(); // симметричный обход
